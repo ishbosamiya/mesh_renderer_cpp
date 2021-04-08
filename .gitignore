@@ -1,0 +1,15 @@
+*~
+*#*#*
+project_test
+GPATH
+GRTAGS
+GTAGS
+.references/
+temp/
+*.obj
+*.bak
+.gdb_history
+peda-session*.*
+.testing/
+gp_project
+gp_project_debug
