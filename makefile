@@ -10,7 +10,7 @@ endif
 
 GL_FLAGS = -lglfw -lGL -ldl
 LIB_FLAGS =
-OBJS = glad.o
+OBJS = glad.o gpu_immediate.o
 PROJECT_NAME = gp_project
 
 ifeq (${mode}, debug)
@@ -29,6 +29,8 @@ glad.o:
 	${CC} -c glad.c -o $@ ${GL_FLAGS}
 main.o:
 	${CC} ${INCLUDES} ${FLAGS} -c main.cpp -o $@ ${GL_FLAGS} ${LIB_FLAGS}
+gpu_immediate.o:
+	${CC} ${INCLUDES} ${FLAGS} -c gpu_immediate.cpp -o $@ ${GL_FLAGS} ${LIB_FLAGS}
 
 .PHONEY: clean clean_emacs_files clean_all
 clean:

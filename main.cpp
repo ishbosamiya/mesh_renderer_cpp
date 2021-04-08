@@ -1,7 +1,12 @@
 #include <iostream>
+#include <cassert>
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+
+#include "camera.hpp"
+#include "gpu_immediate.hpp"
 
 using namespace std;
 
@@ -13,6 +18,7 @@ void processInput(GLFWwindow *window);
 const unsigned int SCR_WIDTH = 1280;
 const unsigned int SCR_HEIGHT = 720;
 
+Camera camera(SCR_WIDTH, SCR_HEIGHT, glm::vec3(0.0f, 0.0f, 3.0f));
 float last_x = SCR_WIDTH / 2.0f;
 float last_y = SCR_HEIGHT / 2.0f;
 float last_cursor_x = last_x;
@@ -65,6 +71,14 @@ int main()
   glEnable(GL_BLEND);
   glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
+  /* Initialize gpu_immediate work-alike */
+  immInit();
+  immActivate();
+
+  /* shaders */
+  Shader smooth_shader("shaders/shader_3D_smooth_color.vert",
+                       "shaders/shader_3D_smooth_color.frag");
+
   // render loop
   unsigned int frame_count = 0;
   float initial_time = glfwGetTime();
@@ -90,10 +104,39 @@ int main()
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+    /* shader setup */
+    glm::mat4 projection = camera.getProjectionMatrix();
+    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 model = glm::mat4(1.0);
+    smooth_shader.use();
+    smooth_shader.setMat4("projection", projection);
+    smooth_shader.setMat4("view", view);
+    smooth_shader.setMat4("model", model);
+
+    /* imm test */
+    {
+      GPUVertFormat *format = immVertexFormat();
+      uint pos = format->addAttribute("pos", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
+      uint col = format->addAttribute("color", GPU_COMP_F32, 4, GPU_FETCH_FLOAT);
+      immBegin(GPU_PRIM_LINES, 2, &smooth_shader);
+
+      immAttr4f(col, 1.0, 0.5, 0.0, 1.0);
+      immVertex3f(pos, 0.0, 0.0, -1.0);
+
+      immAttr4f(col, 0.0, 0.5, 1.0, 1.0);
+      immVertex3f(pos, 0.0, 0.0, 1.0);
+
+      immEnd();
+    }
+
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
+
+  /* terminate gpu_immediate work-alike */
+  immDeactivate();
+  immDestroy();
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
   glfwTerminate();
@@ -108,11 +151,11 @@ void processInput(GLFWwindow *window)
     glfwSetWindowShouldClose(window, true);
   }
 
-  /* if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) { */
-  /*   if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) { */
-  /*     camera.reset(); */
-  /*   } */
-  /* } */
+  if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_C) == GLFW_PRESS) {
+      camera.reset();
+    }
+  }
 }
 
 // glfw: whenever the window size changed (by OS or user resize) this callback function executes
@@ -121,6 +164,9 @@ void framebuffer_size_callback(GLFWwindow *window, int width, int height)
   // make sure the viewport matches the new window dimensions; note that width and
   // height will be significantly larger than specified on retina displays.
   glViewport(0, 0, width, height);
+
+  assert(false); /* Camera and such needs to get the
+                  * updated width and height*/
 }
 
 // glfw: whenever the mouse moves, this callback is called
@@ -136,18 +182,18 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos)
   float yoffset = last_y - ypos;  // reversed since y-coordinates go
                                   // from bottom to top
 
-  /* int mouse_state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE); */
-  /* if (mouse_state == GLFW_PRESS) { */
-  /*   if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) { */
-  /*     camera.pan(last_x, last_y, xpos, ypos, 1.0f); */
-  /*   } */
-  /*   else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) { */
-  /*     camera.moveForward(last_y, ypos); */
-  /*   } */
-  /*   else { */
-  /*     camera.processMouseMovement(xoffset, yoffset); */
-  /*   } */
-  /* } */
+  int mouse_state = glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_MIDDLE);
+  if (mouse_state == GLFW_PRESS) {
+    if (glfwGetKey(window, GLFW_KEY_LEFT_SHIFT) == GLFW_PRESS) {
+      camera.pan(last_x, last_y, xpos, ypos, 1.0f);
+    }
+    else if (glfwGetKey(window, GLFW_KEY_LEFT_CONTROL) == GLFW_PRESS) {
+      camera.moveForward(last_y, ypos);
+    }
+    else {
+      camera.processMouseMovement(xoffset, yoffset);
+    }
+  }
 
   last_x = xpos;
   last_y = ypos;
@@ -156,5 +202,5 @@ void mouse_callback(GLFWwindow *window, double xpos, double ypos)
 // glfw: whenever the mouse scroll wheel scrolls, this callback is called
 void scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
 {
-  /* camera.processMouseScroll(yoffset); */
+  camera.processMouseScroll(yoffset);
 }
