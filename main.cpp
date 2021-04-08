@@ -82,6 +82,7 @@ int main()
   // render loop
   unsigned int frame_count = 0;
   float initial_time = glfwGetTime();
+  float fps_initial_time = glfwGetTime();
   while (!glfwWindowShouldClose(window)) {
     frame_count++;
 
@@ -95,6 +96,11 @@ int main()
     if (frame_count > 240) {
       frame_count = 0;
       initial_time = glfwGetTime();
+    }
+
+    if (glfwGetTime() - fps_initial_time > 1.0) {
+      cout << "fps: " << avg_fps << endl;
+      fps_initial_time = glfwGetTime();
     }
 
     // input
