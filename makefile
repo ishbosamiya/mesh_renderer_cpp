@@ -1,5 +1,5 @@
 CC = g++
-INCLUDES = -I/usr/include/eigen3/
+INCLUDES = -Ideps/eigen -Ideps/glad/include -Ideps/glm
 
 ifeq (${mode}, release)
 	FLAGS = -O3 -march=native
@@ -26,7 +26,7 @@ ${PROJECT}: ${OBJS} main.o clean_emacs_files
 	-make clean
 
 glad.o:
-	${CC} -c glad.c -o $@ ${GL_FLAGS}
+	${CC} ${INCLUDES} -c deps/glad/src/glad.c -o $@ ${GL_FLAGS}
 main.o:
 	${CC} ${INCLUDES} ${FLAGS} -c main.cpp -o $@ ${GL_FLAGS} ${LIB_FLAGS}
 gpu_immediate.o:
