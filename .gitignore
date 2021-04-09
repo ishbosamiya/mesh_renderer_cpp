@@ -13,3 +13,4 @@ peda-session*.*
 .testing/
 mesh_renderer
 mesh_renderer_debug
+deps/glad/
