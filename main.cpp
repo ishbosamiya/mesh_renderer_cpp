@@ -7,6 +7,7 @@
 
 #include "camera.hpp"
 #include "gpu_immediate.hpp"
+#include "mesh.hpp"
 
 using namespace std;
 
@@ -78,6 +79,15 @@ int main()
   /* shaders */
   Shader smooth_shader("shaders/shader_3D_smooth_color.vert",
                        "shaders/shader_3D_smooth_color.frag");
+  Shader directional_light_shader("shaders/directional_light.vert",
+                                  "shaders/directional_light.frag");
+  glm::vec3 light_dir(-0.7f, -1.0f, -0.7f);
+
+  /* Mesh */
+  Mesh mesh("models/plane_subd_01.obj",
+            Vec3(0.0, 0.0, 0.0),
+            Vec3(1.0, 1.0, 1.0),
+            &directional_light_shader);
 
   // render loop
   unsigned int frame_count = 0;
@@ -118,22 +128,21 @@ int main()
     smooth_shader.setMat4("projection", projection);
     smooth_shader.setMat4("view", view);
     smooth_shader.setMat4("model", model);
+    directional_light_shader.use();
+    directional_light_shader.setVec3("viewPos", camera.position);
+    directional_light_shader.setVec3("material.color", 0.3f, 0.2f, 0.7f);
+    glm::vec3 specular(0.3f);
+    directional_light_shader.setVec3("material.specular", specular);
+    directional_light_shader.setFloat("material.shininess", 4.0f);
+    directional_light_shader.setVec3("light.direction", light_dir);
+    directional_light_shader.setVec3("light.ambient", 0.3f, 0.3f, 0.3f);
+    directional_light_shader.setVec3("light.diffuse", 1.0f, 1.0f, 1.0f);
+    directional_light_shader.setVec3("light.specular", 1.0f, 1.0f, 1.0f);
+    directional_light_shader.setMat4("projection", projection);
+    directional_light_shader.setMat4("view", view);
 
-    /* imm test */
-    {
-      GPUVertFormat *format = immVertexFormat();
-      uint pos = format->addAttribute("pos", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
-      uint col = format->addAttribute("color", GPU_COMP_F32, 4, GPU_FETCH_FLOAT);
-      immBegin(GPU_PRIM_LINES, 2, &smooth_shader);
-
-      immAttr4f(col, 1.0, 0.5, 0.0, 1.0);
-      immVertex3f(pos, 0.0, 0.0, -1.0);
-
-      immAttr4f(col, 0.0, 0.5, 1.0, 1.0);
-      immVertex3f(pos, 0.0, 0.0, 1.0);
-
-      immEnd();
-    }
+    /* Mesh drawing */
+    mesh.draw();
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     glfwSwapBuffers(window);

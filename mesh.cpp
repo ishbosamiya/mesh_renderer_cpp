@@ -252,7 +252,7 @@ void Mesh::loadObj(const string &file)
     else if (keyword == "v") {
       Vec3 x;
       linestream >> x[0] >> x[1] >> x[2];
-      this->add(new Node(x, Vec3(0)));
+      this->add(new Node(x, Vec3(0.0, 0.0, 0.0)));
     }
     else if (keyword == "vn") {
       Vec3 n;
@@ -357,7 +357,42 @@ void Mesh::shadeSmooth()
 
 void Mesh::draw()
 {
-  /* TODO(ish) */
+  this->setShaderModelMatrix();
+  GPUVertFormat *format = immVertexFormat();
+  uint pos_attr = format->addAttribute("aPos", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
+  uint uv_attr = format->addAttribute("aTexCoord", GPU_COMP_F32, 2, GPU_FETCH_FLOAT);
+  uint normal_attr = format->addAttribute("aNormal", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
+
+  auto face_len = this->faces.size();
+  immBegin(GPU_PRIM_TRIS, face_len * 3, this->shader);
+
+  for (int i = 0; i < face_len; i++) {
+    auto &x1 = this->faces[i]->v[0]->node->x;
+    auto &uv1 = this->faces[i]->v[0]->uv;
+    auto &n1 = this->faces[i]->v[0]->node->n;
+
+    auto &x2 = this->faces[i]->v[1]->node->x;
+    auto &uv2 = this->faces[i]->v[1]->uv;
+    auto &n2 = this->faces[i]->v[1]->node->n;
+
+    auto &x3 = this->faces[i]->v[2]->node->x;
+    auto &uv3 = this->faces[i]->v[2]->uv;
+    auto &n3 = this->faces[i]->v[2]->node->n;
+
+    immAttr2f(uv_attr, uv1[0], uv1[1]);
+    immAttr3f(normal_attr, n1[0], n1[1], n1[2]);
+    immVertex3f(pos_attr, x1[0], x1[1], x1[2]);
+
+    immAttr2f(uv_attr, uv2[0], uv2[1]);
+    immAttr3f(normal_attr, n2[0], n2[1], n2[2]);
+    immVertex3f(pos_attr, x2[0], x2[1], x2[2]);
+
+    immAttr2f(uv_attr, uv2[0], uv2[1]);
+    immAttr3f(normal_attr, n2[0], n2[1], n2[2]);
+    immVertex3f(pos_attr, x2[0], x2[1], x2[2]);
+  }
+
+  immEnd();
 }
 
 void Mesh::drawWireframe(glm::mat4 projection, glm::mat4 view, Vec4 color)
