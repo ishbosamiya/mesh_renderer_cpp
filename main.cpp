@@ -84,7 +84,7 @@ int main()
   glm::vec3 light_dir(-0.7f, -1.0f, -0.7f);
 
   /* Mesh */
-  Mesh mesh("models/plane_subd_01.obj",
+  Mesh mesh("models/monkey_subd_01.obj",
             Vec3(0.0, 0.0, 0.0),
             Vec3(1.0, 1.0, 1.0),
             &directional_light_shader);
@@ -143,6 +143,7 @@ int main()
 
     /* Mesh drawing */
     mesh.draw();
+    mesh.drawWireframe(projection, view, Vec4(0.7, 0.7, 0.7, 1.0));
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved etc.)
     glfwSwapBuffers(window);
