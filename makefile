@@ -11,7 +11,7 @@ endif
 GL_FLAGS = -lglfw -lGL -ldl
 LIB_FLAGS =
 OBJS = glad.o gpu_immediate.o mesh.o
-PROJECT_NAME = gp_project
+PROJECT_NAME = mesh_renderer
 
 ifeq (${mode}, debug)
 	PROJECT = ${PROJECT_NAME}_debug

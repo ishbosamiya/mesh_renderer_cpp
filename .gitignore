@@ -11,5 +11,5 @@ temp/
 .gdb_history
 peda-session*.*
 .testing/
-gp_project
-gp_project_debug
+mesh_renderer
+mesh_renderer_debug
