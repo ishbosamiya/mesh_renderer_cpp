@@ -359,9 +359,9 @@ void Mesh::draw()
 {
   this->setShaderModelMatrix();
   GPUVertFormat *format = immVertexFormat();
-  uint pos_attr = format->addAttribute("aPos", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
-  uint uv_attr = format->addAttribute("aTexCoord", GPU_COMP_F32, 2, GPU_FETCH_FLOAT);
-  uint normal_attr = format->addAttribute("aNormal", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
+  uint pos_attr = format->addAttribute("in_pos", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
+  /* uint uv_attr = format->addAttribute("in_uv", GPU_COMP_F32, 2, GPU_FETCH_FLOAT); */
+  uint normal_attr = format->addAttribute("in_normal", GPU_COMP_F32, 3, GPU_FETCH_FLOAT);
 
   auto face_len = this->faces.size();
   immBegin(GPU_PRIM_TRIS, face_len * 3, this->shader);
@@ -379,15 +379,15 @@ void Mesh::draw()
     auto &uv3 = this->faces[i]->v[2]->uv;
     auto &n3 = this->faces[i]->v[2]->node->n;
 
-    immAttr2f(uv_attr, uv1[0], uv1[1]);
+    /* immAttr2f(uv_attr, uv1[0], uv1[1]); */
     immAttr3f(normal_attr, n1[0], n1[1], n1[2]);
     immVertex3f(pos_attr, x1[0], x1[1], x1[2]);
 
-    immAttr2f(uv_attr, uv2[0], uv2[1]);
+    /* immAttr2f(uv_attr, uv2[0], uv2[1]); */
     immAttr3f(normal_attr, n2[0], n2[1], n2[2]);
     immVertex3f(pos_attr, x2[0], x2[1], x2[2]);
 
-    immAttr2f(uv_attr, uv2[0], uv2[1]);
+    /* immAttr2f(uv_attr, uv2[0], uv2[1]); */
     immAttr3f(normal_attr, n2[0], n2[1], n2[2]);
     immVertex3f(pos_attr, x2[0], x2[1], x2[2]);
   }
