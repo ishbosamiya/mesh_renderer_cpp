@@ -387,9 +387,9 @@ void Mesh::draw()
     immAttr3f(normal_attr, n2[0], n2[1], n2[2]);
     immVertex3f(pos_attr, x2[0], x2[1], x2[2]);
 
-    /* immAttr2f(uv_attr, uv2[0], uv2[1]); */
-    immAttr3f(normal_attr, n2[0], n2[1], n2[2]);
-    immVertex3f(pos_attr, x2[0], x2[1], x2[2]);
+    /* immAttr2f(uv_attr, uv3[0], uv3[1]); */
+    immAttr3f(normal_attr, n3[0], n3[1], n3[2]);
+    immVertex3f(pos_attr, x3[0], x3[1], x3[2]);
   }
 
   immEnd();
